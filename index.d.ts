@@ -1,5 +1,11 @@
 // tslint:disable:interface-name
 declare module 'binance-api-node' {
+  import ReconnectingWebSocket, {
+    ErrorEvent,
+    MessageEvent,
+    CloseEvent,
+    Event,
+  } from 'reconnecting-websocket'
   export default function(options?: {
     apiKey?: string
     apiSecret?: string
@@ -820,10 +826,17 @@ declare module 'binance-api-node' {
       period: string,
       callback: (ticker: Candle) => void,
     ) => ReconnectingWebSocketHandler
-    trades: (
-      pairs: string | string[],
-      callback: (trade: WSTrade) => void,
-    ) => ReconnectingWebSocketHandler
+    trades: <S extends string>(
+      pairs: S | S[],
+      callback: (
+        trade: WSTrade,
+      ) => void | {
+        onmessage: (trade: WSTrade) => void
+        onclose?: (event: CloseEvent) => void
+        onerror?: (event: ErrorEvent) => void
+        onopen?: (event: Event) => void
+      },
+    ) => { wsMap: { [index in S]: ReconnectingWebSocket }; closeAll: ReconnectingWebSocketHandler }
     aggTrades: (
       pairs: string | string[],
       callback: (trade: AggregatedTrade) => void,
@@ -1589,9 +1602,9 @@ declare module 'binance-api-node' {
     listClientOrderId: string
     transactionTime: number
     orders: Array<{
-        symbol: string
-        orderId: number
-        clientOrderId: string
+      symbol: string
+      orderId: number
+      clientOrderId: string
     }>
   }
 

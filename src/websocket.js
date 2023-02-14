@@ -565,20 +565,37 @@ const tradesTransform = m => ({
   sellerOrderId: m.a,
 })
 
-const trades = (payload, cb, transform = true) => {
+const trades = (payload, handlers, transform = true) => {
+  const wsMap = {}
+  if (typeof handlers !== 'function' && !handlers.onmessage) {
+    throw 'You need onmessage handler'
+  }
+  if (typeof handlers === 'function') {
+    handlers = { onmessage: handlers }
+  }
   const cache = (Array.isArray(payload) ? payload : [payload]).map(symbol => {
     const w = openWebSocket(`${endpoints.base}/${symbol.toLowerCase()}@trade`)
+    wsMap[symbol] = w
     w.onmessage = msg => {
       const obj = JSONbig.parse(msg.data)
-
-      cb(transform ? tradesTransform(obj) : obj)
+      handlers.onmessage(transform ? tradesTransform(obj) : obj)
     }
+    ;['onclose', 'onerror', 'onopen'].forEach(handlerType => {
+      if (handlers[handlerType]) {
+        w[handlerType] = handlers[handlerType]
+      }
+    })
 
     return w
   })
 
-  return options =>
-    cache.forEach(w => w.close(1000, 'Close handle was called', { keepClosed: true, ...options }))
+  return {
+    wsMap: wsMap,
+    closeAll: options =>
+      cache.forEach(w =>
+        w.close(1000, 'Close handle was called', { keepClosed: true, ...options }),
+      ),
+  }
 }
 
 const userTransforms = {
