@@ -775,7 +775,7 @@ declare module 'binance-api-node' {
 
   export type WebSocketCallback<T> = (value: T) => void
 
-  export type WebSocketHandlers<T> = {
+  export type WebSocketHandlers<T, S> = {
     onmessage: WebSocketCallback<T>
     onclose?: (event: CloseEvent, symbol: S) => void
     onerror?: (event: ErrorEvent, symbol: S) => void
@@ -837,7 +837,7 @@ declare module 'binance-api-node' {
     ) => ReconnectingWebSocketHandler
     trades: <S extends string>(
       pairs: S | S[],
-      handlers: WebSocketCallback<WSTrade> | WebSocketHandlers<WSTrade>,
+      handlers: WebSocketCallback<WSTrade> | WebSocketHandlers<WSTrade, S>,
     ) => { wsMap: { [index in S]: ReconnectingWebSocket }; closeAll: ReconnectingWebSocketHandler }
     aggTrades: (
       pairs: string | string[],
