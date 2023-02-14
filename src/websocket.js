@@ -582,7 +582,7 @@ const trades = (payload, handlers, transform = true) => {
     }
     ;['onclose', 'onerror', 'onopen'].forEach(handlerType => {
       if (handlers[handlerType]) {
-        w[handlerType] = handlers[handlerType]
+        w[handlerType] = event => handlers[handlerType](event, symbol)
       }
     })
 

@@ -832,9 +832,9 @@ declare module 'binance-api-node' {
         trade: WSTrade,
       ) => void | {
         onmessage: (trade: WSTrade) => void
-        onclose?: (event: CloseEvent) => void
-        onerror?: (event: ErrorEvent) => void
-        onopen?: (event: Event) => void
+        onclose?: (event: CloseEvent, symbol: S) => void
+        onerror?: (event: ErrorEvent, symbol: S) => void
+        onopen?: (event: Event, symbol: S) => void
       },
     ) => { wsMap: { [index in S]: ReconnectingWebSocket }; closeAll: ReconnectingWebSocketHandler }
     aggTrades: (
