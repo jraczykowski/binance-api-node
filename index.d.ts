@@ -773,6 +773,15 @@ declare module 'binance-api-node' {
     | OutboundAccountPosition
     | MarginCall
 
+  export type WebSocketCallback<T> = (value: T) => void
+
+  export type WebSocketHandlers<T> = {
+    onmessage: WebSocketCallback<T>
+    onclose?: (event: CloseEvent, symbol: S) => void
+    onerror?: (event: ErrorEvent, symbol: S) => void
+    onopen?: (event: Event, symbol: S) => void
+  }
+
   export interface WebSocket {
     customSubStream: (
       pair: string | string[],
@@ -828,14 +837,7 @@ declare module 'binance-api-node' {
     ) => ReconnectingWebSocketHandler
     trades: <S extends string>(
       pairs: S | S[],
-      callback: (
-        trade: WSTrade,
-      ) => void | {
-        onmessage: (trade: WSTrade) => void
-        onclose?: (event: CloseEvent, symbol: S) => void
-        onerror?: (event: ErrorEvent, symbol: S) => void
-        onopen?: (event: Event, symbol: S) => void
-      },
+      handlers: WebSocketCallback<WSTrade> | WebSocketHandlers<WSTrade>,
     ) => { wsMap: { [index in S]: ReconnectingWebSocket }; closeAll: ReconnectingWebSocketHandler }
     aggTrades: (
       pairs: string | string[],
